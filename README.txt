@@ -65,7 +65,7 @@ In first lines of the main scripts you have to adapt the paths to your system.
 (Everything between: 
  # set variables #########################################
  ...
- #########################################################
+ #########################################################)
 
 
 If the parameters are set you can run the pipeline as follows:
