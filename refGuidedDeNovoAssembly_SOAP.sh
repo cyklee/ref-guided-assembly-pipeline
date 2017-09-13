@@ -14,6 +14,7 @@ primerFileMP=/home/hlischer/Programs/AdapterSeqMP_new.fa
 
 NThreads=8      # set the number of threads of every parallelizable step
 maxReadLength=100
+kmer=61         #define best K (need to be adapted)
 
 
 # paired-end libraries -------------------
@@ -454,7 +455,7 @@ mkdir ${workPath}
   soapConf=soap.config
   java -jar ${progWriteSoapConfig} -insLength ${libList} -r1 ${forwardReads} -r2 ${reverseReads} -max ${maxReadLength} -ru 3 -rank -o ${soapConf}
 
-  for (( i=81; i>=61; i-=10 ))
+  for (( i=81; i>=41; i-=10 ))
   do
     ${progSoapdenovo2}/SOAPdenovo-127mer all -s ${soapConf} -K ${i} -o Unass_${j}_Soap -p ${NThreads} -F
   done
@@ -481,7 +482,7 @@ mkdir ${workPath}
   #remove short seq (<500)
   echo "remove seq < 500 in ${orgUnass}" >> $log
   unass500=${unassFolder}/Unassembled_Soap_500.fa
-  $java7 -jar ${progRemovShortSeq} -i ${orgUnass} -o ${unass500} -length 500  >> $log
+  java -jar ${progRemovShortSeq} -i ${orgUnass} -o ${unass500} -length 500  >> $log
   
   #merge all files
   superblockSeq=${workPath}/deNovo_Superblocks.fa
@@ -588,22 +589,15 @@ mkdir ${workPath}
   soapConf=soap.config
   java -jar ${progWriteSoapConfig} -insLength ${libList} -r1 ${forwardReads} -r2 ${reverseReads}  -max ${maxReadLength} -ru 3 -rank -o ${soapConf}
 
-  log=${workPath}/log_${name}_soap.txt
-  for (( i=41; i>=81; i-=10 ))
-  do
-    ${progSoapdenovo2}/SOAPdenovo-127mer all -s ${soapConf} -K ${i} -o Unass_${i}_Soap -p ${NThreads} -F
-  done
-  
+  ${progSoapdenovo2}/SOAPdenovo-127mer all -s ${soapConf} -K ${kmer} -o Unass_${kmer}_Soap -p ${NThreads} -F
   cd ${supercontUnassFolder}
     
-  #define best K (may need to be adapted!)
-  bestK=61
   
   #remove contigs shorter than 200 bp
   supercontSeqUnass=${supercontUnassFolder}/Unass-contigs_200.fa
-  $java7 -jar ${progRemovShortSeq} -i Unass_${bestK}_Soap.contig -o ${supercontSeqUnass} -length 200 >> $log
+  java -jar ${progRemovShortSeq} -i Unass_${kmer}_Soap.contig -o ${supercontSeqUnass} -length 200 >> $log
   echo ${supercontSeqUnass} >> $log
-  ${java7} -jar ${progFastaStats} -i ${supercontSeqUnass} -min 200 >> $log
+  java -jar ${progFastaStats} -i ${supercontSeqUnass} -min 200 >> $log
   
  
  
@@ -765,8 +759,8 @@ mkdir ${workPath}
   #write config file
   soapConf=${scafFolder}/soap.config
   java -jar ${progWriteSoapConfig} -insLength ${libList} -r1 ${forwardReads} -r2 ${reverseReads} -max ${maxReadLength} -ru 2 -mateInsLength ${mateLibList} -mateR1 ${mateForwardReads} -mateR2 ${mateReverseReads} -mateRu 2 -rank -o ${soapConf}
-  scafFile=${name}_61
-  ${progSoapdenovo2}/prepare/finalFusion -D -c ${mergedCorrWN%.fa}_splitFiltered.fa -K 61 -g ${scafFile} -p ${NThreads}
+  scafFile=${name}_${kmer}
+  ${progSoapdenovo2}/prepare/finalFusion -D -c ${mergedCorrWN%.fa}_splitFiltered.fa -K ${kmer} -g ${scafFile} -p ${NThreads}
   ${progSoapdenovo2}/SOAPdenovo-127mer map -s ${soapConf} -g ${scafFile} -p ${NThreads}
   ${progSoapdenovo2}/SOAPdenovo-127mer scaff -g ${scafFile} -p ${NThreads} -F
    

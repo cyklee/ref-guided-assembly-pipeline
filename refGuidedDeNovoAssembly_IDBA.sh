@@ -14,7 +14,7 @@ primerFileMP=/home/hlischer/Programs/AdapterSeqMP_new.fa
 
 NThreads=8      # set the number of threads of every parallelizable step
 maxReadLength=100
-
+kmer=61         #define best K (need to be adapted)
 
 # paired-end libraries -------------------
 name=Aly_sim           # set name of your species
@@ -454,7 +454,7 @@ mkdir ${workPath}
   #remove short seq (<500)
   echo "remove seq < 500 in ${orgUnass}" >> $log
   unass500=${unassFolder}/Unassembled_Idba_500.fa
-  $java7 -jar ${progRemovShortSeq} -i ${orgUnass} -o ${unass500} -length 500  >> $log
+  java -jar ${progRemovShortSeq} -i ${orgUnass} -o ${unass500} -length 500  >> $log
   
   #merge all files
   superblockSeq=${workPath}/deNovo_Superblocks.fa
@@ -559,9 +559,9 @@ mkdir ${workPath}
   
   #remove contigs shorter than 200 bp
   supercontSeqUnass=${supercontUnassFolder}/Unass-contigs_200.fa
-  $java7 -jar ${progRemovShortSeq} -i idbaResults/contig.fa -o ${supercontSeqUnass} -length 200 >> $log
+  java -jar ${progRemovShortSeq} -i idbaResults/contig.fa -o ${supercontSeqUnass} -length 200 >> $log
   echo ${supercontSeqUnass} >> $log
-  ${java7} -jar ${progFastaStats} -i ${supercontSeqUnass} -min 200 >> $log
+  java -jar ${progFastaStats} -i ${supercontSeqUnass} -min 200 >> $log
   
  
  
@@ -723,8 +723,8 @@ mkdir ${workPath}
   #write config file
   soapConf=${scafFolder}/soap.config
   java -jar ${progWriteSoapConfig} -insLength ${libList} -r1 ${forwardReads} -r2 ${reverseReads} -max ${maxReadLength} -ru 2 -mateInsLength ${mateLibList} -mateR1 ${mateForwardReads} -mateR2 ${mateReverseReads} -mateRu 2 -rank -o ${soapConf}
-  scafFile=${name}_61
-  ${progSoapdenovo2}/prepare/finalFusion -D -c ${mergedCorrWN%.fa}_splitFiltered.fa -K 61 -g ${scafFile} -p ${NThreads}
+  scafFile=${name}_${kmer}
+  ${progSoapdenovo2}/prepare/finalFusion -D -c ${mergedCorrWN%.fa}_splitFiltered.fa -K ${kmer} -g ${scafFile} -p ${NThreads}
   ${progSoapdenovo2}/SOAPdenovo-127mer map -s ${soapConf} -g ${scafFile} -p ${NThreads}
   ${progSoapdenovo2}/SOAPdenovo-127mer scaff -g ${scafFile} -p ${NThreads} -F
    
