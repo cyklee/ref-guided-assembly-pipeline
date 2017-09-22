@@ -602,7 +602,7 @@ mkdir ${workPath}
   #remove contigs shorter than 200 bp
   cd ${supercontUnassFolder}
   supercontSeqUnass=${supercontUnassFolder}/Unass-contigs_200.fa
-  java -jar ${progRemovShortSeq} -i k${kmer}/Unass_${kmer}-contigs.fa -o ${supercontSeqUnass} -length 200 >> $log
+  java -jar ${progRemovShortSeq} -i k${kmer}/Unass_${kmer}-contigs.fa -o ${supercontSeqUnass} -length 100 >> $log
   echo ${supercontSeqUnass} >> $log
   java -jar ${progFastaStats} -i ${supercontSeqUnass} -min 200 >> $log
     
@@ -678,7 +678,7 @@ mkdir ${workPath}
   #remove start and end N
   mergedCorrWN=${mergedCorr%.fq}WN.fa 
   echo ${mergedCorrWN} >> $log
-  java -jar ${progRemovShortSeq} -i ${mergedCorr} -o ${mergedCorrWN} -length 200 -n -fq >> $log
+  java -jar ${progRemovShortSeq} -i ${mergedCorr} -o ${mergedCorrWN} -length 100 -n -fq >> $log
   
   #get statistics
   echo ${mergedCorrWN} >> $log
