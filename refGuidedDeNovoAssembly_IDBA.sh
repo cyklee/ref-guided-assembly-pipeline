@@ -66,6 +66,7 @@ progBowtie2=${progPath}/bowtie2-2.2.1/bowtie2
 progSeqtk=${progPath}/seqtk-master/seqtk
 progIdba=${progPath}/idba-1.1.1/bin/
 progAmos=${progPath}/amos-3.1.0/bin/
+progNucmer=${progPath}/mummer-4.0.0beta2/nucmer
 progGatk=${progPath}/GenomeAnalysisTK-3.1-1/GenomeAnalysisTK.jar
 progSoapdenovo2=${progPath}/SOAPdenovo2-src-r240
 progRemovShortSeq=${progPath}/RemoveShortSeq.jar
@@ -476,7 +477,38 @@ mkdir ${workPath}
   java -jar ${progFastaToAmos} -i ${superblockSeq200} -o ${superblockSeqAmos}
   supercontigs=Amos_supercontigs
   amosSupercontigs=${amosFolder}/${supercontigs}.fasta
-  ${progAmos}AMOScmp -D TGT=${superblockSeqAmos} -D REF=${ref}.fa ${supercontigs}
+  
+  echo "run AMPScmp..." >> $log
+  #${progAmos}AMOScmp -D TGT=${superblockSeqAmos} -D REF=${refRed}.fa ${supercontigs}
+  
+  # running AMPScmp step by step and use multithread nucmer to spead it up
+  ## Building AMOS bank
+  echo "  build AMPS bank..." >> $log
+  ${progAmos}/bank-transact -c -z -b ${supercontigs}.bnk -m ${superblockSeqAmos}
+
+  ## Collecting clear range sequences
+  echo "  clear range sequences..." >> $log
+  ${progAmos}/dumpreads ${supercontigs}.bnk > ${supercontigs}.seq
+
+  ## Running nucmer
+  echo "  run nucmer..." >> $log
+  ${progNucmer} --maxmatch --threads=${NThreads} --prefix=${supercontigs} ${refRed}.fa ${supercontigs}.seq
+
+  ## Running layout
+  echo "  run layout..." >> $log
+  ${progAmos}/casm-layout -t 1000 -U ${supercontigs}.layout -C ${supercontigs}.conflict -b ${supercontigs}.bnk ${supercontigs}.delta
+
+  ## Running consensus
+  echo "  run consensus..." >> $log
+  ${progAmos}/make-consensus -o 10 -B -b ${supercontigs}.bnk
+
+  ## Outputting contigs
+  echo "  output contigs..." >> $log
+  ${progAmos}/bank2contig ${supercontigs}.bnk > ${supercontigs}.contig
+
+  ## Outputting fasta
+  echo "  output fasta..." >> $log
+  ${progAmos}/bank2fasta -b ${supercontigs}.bnk > ${supercontigs}.fasta
       
  
  
