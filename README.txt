@@ -1,3 +1,12 @@
+Repo forked from https://bitbucket.org/HeidiLischer/refguideddenovoassembly_pipelines/
+
+To do list:
+1. Test run code
+2. Assess reference guided assembly quality
+3. Adapt code for SPAdes assember
+4. Compare assembly quality
+5. Optimise assembly parameters
+
 #########################################################
 #  README -
 #  Reference-guided de novo assembly
